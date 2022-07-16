@@ -3,15 +3,17 @@ import { abi, contractAddress } from "./constants.js";
 
 const connectBtn = document.getElementById("connectBtn");
 const interactionDiv = document.getElementById("interactionDiv");
+const ethAmountInput = document.getElementById("ethAmount");
 const fundBtn = document.getElementById("fundBtn");
 const withdrawBtn = document.getElementById("withdrawBtn");
 const balanceBtn = document.getElementById("balanceBtn");
-const ethAmountInput = document.getElementById("ethAmount");
+const minFundingBtn = document.getElementById("minFundingBtn");
 const statusSpan = document.getElementById("status");
 connectBtn.onclick = connect;
 fundBtn.onclick = fund;
 balanceBtn.onclick = getBalance;
 withdrawBtn.onclick = withdraw;
+minFundingBtn.onclick = getMinFunding;
 
 async function connect() {
   if (window.ethereum) {
@@ -63,6 +65,7 @@ function listenForTransactionMine(txResponse, provider) {
 
 async function getBalance() {
   if (typeof window.ethereum != "undefined") {
+    statusSpan.innerText = "Loading...";
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const balance = await provider.getBalance(contractAddress);
     statusSpan.innerHTML = `Current Balance: <b>${ethers.utils.formatEther(
@@ -87,5 +90,16 @@ async function withdraw() {
       console.log(err);
       statusSpan.innerText = "Error occured! Please check console.";
     }
+  }
+}
+
+async function getMinFunding() {
+  if (typeof window.ethereum != "undefined") {
+    statusSpan.innerText = "Loading...";
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+    const minFunding = await contract.MIN_USD();
+    statusSpan.innerHTML = `Minimum funding: <b>$${minFunding / 10 ** 18}<b>`;
   }
 }
